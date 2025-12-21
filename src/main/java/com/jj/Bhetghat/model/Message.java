@@ -8,21 +8,22 @@ import java.time.LocalDateTime;
 @Entity
 @Getter @Setter
 public class Message {
+
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name="event_id", nullable=false)
+    @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
     @ManyToOne
-    @JoinColumn(name="sender_id", nullable=false)
-    private User sender;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; // <-- add this if missing
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String content;
 
-    @Column(nullable=false, updatable=false)
-    private LocalDateTime sentAt = LocalDateTime.now();
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

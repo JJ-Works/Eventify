@@ -1,26 +1,31 @@
 package com.jj.Bhetghat.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
+@Table(name = "users")  // avoid reserved keyword "user"
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String name;
 
-    @Column(nullable=false, unique=true)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String password;
 
-    // shows createdAt timestamp
-    @Column(nullable=false, updatable=false)
-    private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 }

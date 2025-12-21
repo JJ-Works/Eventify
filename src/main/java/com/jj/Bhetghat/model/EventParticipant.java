@@ -3,18 +3,26 @@ package com.jj.Bhetghat.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
-@IdClass(EventParticipantId.class)
+@Getter
+@Setter
 public class EventParticipant {
-    @Id
-    private Long eventId;
 
     @Id
-    private Long userId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(nullable=false, updatable=false)
+    @ManyToOne
+    @JoinColumn(name = "event_id", nullable = false)
+    private Event event;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(nullable = false, updatable = false)
     private LocalDateTime joinedAt = LocalDateTime.now();
 }
