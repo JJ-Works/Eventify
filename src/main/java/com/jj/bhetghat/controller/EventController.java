@@ -27,7 +27,7 @@ public class EventController {
 
     // Create new event
     @PostMapping("/create")
-    public Event createEvent(@RequestBody Event event) {
+    public Event createEvent@Valid @RequestBody Event event) {
         return eventService.saveEvent(event);
     }
 
