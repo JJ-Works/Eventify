@@ -1,6 +1,8 @@
 package com.jj.bhetghat.service;
 
+import com.jj.bhetghat.model.Event;
 import com.jj.bhetghat.model.JoinRequest;
+import com.jj.bhetghat.model.User;
 import com.jj.bhetghat.repository.JoinRequestRepository;
 import com.jj.bhetghat.repository.EventRepository;
 import org.springframework.stereotype.Service;
@@ -26,27 +28,32 @@ public class JoinRequestServiceImpl implements JoinRequestService {
 
     @Override
     public void approveRequest(Long requestId) {
-        JoinRequest request = joinRequestRepository.findById(requestId).orElse(null);
-        if (request != null) {
-            request.setStatus("APPROVED");
-            joinRequestRepository.save(request);
+        JoinRequest request = joinRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("JoinRequest not found"));
 
-            // Add user to event participants
-            var event = request.getEvent();
-            if (!event.getParticipants().contains(request.getUser())) {
-                event.getParticipants().add(request.getUser());
-                eventRepository.save(event);
-            }
+        Event managedEvent = eventRepository.findById(request.getEvent().getId())
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+
+        User user = request.getUser();
+
+        // Check if user already in participants
+        if (!managedEvent.getParticipants().contains(user)) {
+            managedEvent.getParticipants().add(user);
+            eventRepository.save(managedEvent);
         }
+
+        // Update request status
+        request.setStatus("APPROVED");
+        joinRequestRepository.save(request);
     }
 
     @Override
     public void rejectRequest(Long requestId) {
-        JoinRequest request = joinRequestRepository.findById(requestId).orElseThrow(() -> new RuntimeException("User not found"));
-        if (request != null) {
-            request.setStatus("REJECTED");
-            joinRequestRepository.save(request);
-        }
+        JoinRequest request = joinRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("JoinRequest not found"));
+
+        request.setStatus("REJECTED");
+        joinRequestRepository.save(request);
     }
 
     @Override

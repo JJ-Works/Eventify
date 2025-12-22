@@ -8,4 +8,6 @@ public interface EventService {
     Event getEventById(Long id);
     List<Event> getAllEvents();
     void deleteEvent(Long id);
+
+    void deleteEventById(Long id);
 }

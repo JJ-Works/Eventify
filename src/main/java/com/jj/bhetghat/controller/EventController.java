@@ -1,6 +1,7 @@
 package com.jj.bhetghat.controller;
 
 import com.jj.bhetghat.model.Event;
+import com.jj.bhetghat.model.EventParticipant;
 import com.jj.bhetghat.model.JoinRequest;
 import com.jj.bhetghat.model.User;
 import com.jj.bhetghat.service.EventService;
@@ -8,6 +9,7 @@ import com.jj.bhetghat.service.JoinRequestService;
 import com.jj.bhetghat.service.UserService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/events")
@@ -16,6 +18,7 @@ public class EventController {
     private final EventService eventService;
     private final JoinRequestService joinRequestService;
     private final UserService userService;
+
 
     public EventController(EventService eventService,
                            JoinRequestService joinRequestService,
@@ -44,10 +47,13 @@ public class EventController {
     }
 
     // Delete event
+    // Delete event
     @DeleteMapping("/{id}")
     public void deleteEvent(@PathVariable Long id) {
-        eventService.deleteEvent(id);
+        eventService.deleteEventById(id);
     }
+
+
 
     // User sends join request to an event
     @PostMapping("/{eventId}/join")
@@ -78,4 +84,7 @@ public class EventController {
     public List<JoinRequest> getEventRequests(@PathVariable Long eventId) {
         return joinRequestService.getRequestsByEventId(eventId);
     }
+
+
+
 }

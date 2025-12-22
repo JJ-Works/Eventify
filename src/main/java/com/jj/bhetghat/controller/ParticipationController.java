@@ -26,7 +26,6 @@ public class ParticipationController {
     @Autowired
     private EventRepository eventRepository;
 
-    // Add a participant
     @PostMapping("/events/{eventId}/join")
     public EventParticipant joinEvent(@PathVariable Long eventId, @RequestBody Map<String, Long> request) {
         Long userId = request.get("userId");
@@ -36,8 +35,15 @@ public class ParticipationController {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        // Check if the event is already full
-        if (event.getParticipants() != null && event.getParticipants().size() >= event.getMaxParticipants()) {
+        // Prevent duplicate join
+        boolean alreadyJoined = participationRepository.existsByUserAndEvent(user, event);
+        if (alreadyJoined) {
+            throw new RuntimeException("User has already joined this event");
+        }
+
+        // Count actual participants in DB
+        long participantCount = participationRepository.countByEvent(event);
+        if (participantCount >= event.getMaxParticipants()) {
             throw new RuntimeException("Event is full");
         }
 
@@ -48,12 +54,22 @@ public class ParticipationController {
         return participationRepository.save(participant);
     }
 
-
     // Get participants of an event
     @GetMapping("/event/{eventId}")
     public List<EventParticipant> getParticipants(@PathVariable Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
         return participationRepository.findByEvent(event);
+    }
+
+    @DeleteMapping("/events/{eventId}/leave")
+    public void leaveEvent(@PathVariable Long eventId, @RequestBody Map<String, Long> request) {
+        Long userId = request.get("userId");
+
+        EventParticipant participant = participationRepository
+                .findByUserIdAndEventId(userId, eventId)
+                .orElseThrow(() -> new RuntimeException("Participation not found"));
+
+        participationRepository.delete(participant);
     }
 }
