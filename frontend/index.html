@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventify - Event Management Platform</title>
+    <link rel="stylesheet" href="css/navbar.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <!-- Logo -->
+            <div class="navbar-logo">
+                <div class="logo-placeholder">img1</div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="navbar-search">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    placeholder="Search events..."
+                    id="searchInput"
+                >
+                <button class="search-btn" id="searchBtn">
+                    <span>🔍</span>
+                </button>
+            </div>
+
+            <!-- Auth Section -->
+            <div class="navbar-auth">
+                <button class="auth-btn login-btn" id="loginBtn">Login</button>
+                <div class="profile-section" id="profileSection" style="display: none;">
+                    <img src="assets/icons/default-avatar.png" alt="Profile" class="profile-avatar" id="profileAvatar">
+                    <div class="profile-dropdown">
+                        <a href="pages/profile.html" class="dropdown-item">My Profile</a>
+                        <a href="pages/create-event.html" class="dropdown-item">Create Event</a>
+                        <a href="#" class="dropdown-item">Settings</a>
+                        <hr class="dropdown-divider">
+                        <button class="dropdown-item logout-btn" id="logoutBtn">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>Eventify</h4>
+                <p>Discover and join amazing events.</p>
+            </div>
+            <div class="footer-section">
+                <h5>Quick Links</h5>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="pages/explore.html">Explore</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h5>Follow Us</h5>
+                <ul>
+                    <li><a href="#facebook">Facebook</a></li>
+                    <li><a href="#twitter">Twitter</a></li>
+                    <li><a href="#instagram">Instagram</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h5>Legal</h5>
+                <ul>
+                    <li><a href="#privacy">Privacy Policy</a></li>
+                    <li><a href="#terms">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Eventify. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/navbar.js"></script>
+</body>
+</html>
