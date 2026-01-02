@@ -39,7 +39,7 @@ label {
     font-weight: 500;
 }
 
-select, input[type="text"], textarea {
+select, input[type="text"], input[type="datetime-local"], input[type="number"], textarea {
     width: 100%;
     padding: 12px 15px;
     border: 1px solid #ddd;

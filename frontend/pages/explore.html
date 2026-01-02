@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../css/explore.css">
     <link rel="stylesheet" href="../css/footer.css">
     <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/avatar.css">
 </head>
 <body>
     <header class="navbar">
@@ -132,44 +133,41 @@
 
         async function loadAllEvents() {
             try {
-                console.log('Fetching events from: http://localhost:8080/events/all');
-                const response = await fetch('http://localhost:8080/events/all');
-                console.log('API Response Status:', response.status);
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Failed to load events. Response:', errorText);
-                    showNoResults();
-                    return;
+                // 1. Fetch from Backend
+                let backendEvents = [];
+                try {
+                    console.log('Fetching events from: http://localhost:8080/events/all');
+                    const response = await fetch('http://localhost:8080/events/all');
+                    
+                    if (response.ok) {
+                        let responseData = await response.json();
+                        if (responseData && Array.isArray(responseData.content)) {
+                            backendEvents = responseData.content;
+                        } else if (Array.isArray(responseData)) {
+                            backendEvents = responseData;
+                        }
+                    } else {
+                        console.warn('Backend fetch failed, falling back to local storage.');
+                    }
+                } catch (apiError) {
+                    console.warn('Backend unavailable:', apiError);
                 }
 
-                let responseData = await response.json();
-                console.log('Parsed Events (raw):', responseData);
+                // 2. Fetch from LocalStorage (Prototype Persistence)
+                const storedEvents = JSON.parse(localStorage.getItem('myEvents') || '[]');
+                console.log('Loaded local events:', storedEvents);
 
-                let processedEvents = [];
-                if (typeof responseData === 'object' && responseData !== null && Array.isArray(responseData.content)) {
-                    processedEvents = responseData.content;
-                    console.log('Unwrapped events from "content" property:', processedEvents);
-                } else if (Array.isArray(responseData)) {
-                    processedEvents = responseData;
-                    console.log('Direct array of events:', processedEvents);
-                } else {
-                    console.warn('API response is not a recognized event array or paginated object, got:', typeof responseData, responseData);
-                    processedEvents = [];
-                }
-
-                allEvents = processedEvents;
+                // 3. Merge Events (Local events first for visibility)
+                allEvents = [...storedEvents.reverse(), ...backendEvents];
                 
                 if (allEvents.length === 0) {
-                    console.log('No events received from API after processing.');
                     showNoResults();
                     return;
                 }
-
 
                 filteredEvents = [...allEvents];
                 displayEvents(filteredEvents);
-                console.log('Events loaded and displayed:', allEvents.length);
+                console.log('Total events loaded:', allEvents.length);
 
             } catch (error) {
                 console.error('Error loading events:', error);

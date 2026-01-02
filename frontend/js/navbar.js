@@ -29,10 +29,21 @@ function checkAuthStatus() {
 
 function loadUserProfile() {
     // Optional: Fetch user details from backend and update profile
-    const userName = localStorage.getItem('userName');
-    const userEmail = localStorage.getItem('userEmail');
-    // You can use this data to update the profile avatar or name
-    console.log('User logged in:', userName);
+    const userName = localStorage.getItem('userName') || 'U';
+    
+    const profileAvatar = document.getElementById('profileAvatar');
+    if (profileAvatar) {
+        // Clear previous background image if any
+        profileAvatar.style.backgroundImage = 'none';
+        profileAvatar.style.backgroundColor = 'transparent'; // Let CSS handle gradient or set here
+        
+        // Remove existing children
+        profileAvatar.innerHTML = '';
+        
+        // Create initial element
+        profileAvatar.classList.add('avatar-initial', 'navbar-avatar-initial');
+        profileAvatar.textContent = userName.charAt(0).toUpperCase();
+    }
 }
 
 function setupAuthListeners() {

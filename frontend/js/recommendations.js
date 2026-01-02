@@ -48,7 +48,7 @@ async function loadRecommendations() {
         }
 
         // Limit to 4 events for landing page (changed to 6 previously)
-        events = events.slice(0, 6);
+        events = events.slice(0, 8);
         console.log('Processed events (limited to 6):', events);
         
         // Clear skeleton loaders

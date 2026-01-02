@@ -18,6 +18,16 @@ function loadProfileData() {
     document.getElementById('profileLocation').textContent = userLocation;
     document.getElementById('profileJoinDate').textContent = `Joined ${joinDate}`;
     
+    // Handle Profile Avatar (Initial)
+    const profilePicContainer = document.querySelector('.profile-pic-container');
+    if (profilePicContainer) {
+        profilePicContainer.innerHTML = ''; // Clear existing img
+        const initialDiv = document.createElement('div');
+        initialDiv.className = 'avatar-initial profile-pic-initial';
+        initialDiv.textContent = userName.charAt(0).toUpperCase();
+        profilePicContainer.appendChild(initialDiv);
+    }
+    
     // User Interests - Mocking this for now as per requirements
     // In a real app, this would come from an API or localStorage
     const interests = ['Hiking', 'Music', 'Technology', 'Food', 'Travel'];
@@ -106,58 +116,34 @@ function loadJoinedEvents() {
     const eventsContainer = document.getElementById('joinedEventsList');
     const currentUserId = localStorage.getItem('userId');
     
-    // Load from localStorage (Simulating DB)
+    // 1. Get events created by me
     const storedEvents = JSON.parse(localStorage.getItem('myEvents') || '[]');
+    const myCreatedEvents = storedEvents.filter(event => event.userId === currentUserId);
     
-    // Filter events belonging to this user
-    const userEvents = storedEvents.filter(event => event.userId === currentUserId);
+    // 2. Get events I have joined (accepted requests)
+    const allRequests = JSON.parse(localStorage.getItem('eventRequests') || '[]');
+    const myAcceptedRequests = allRequests.filter(req => req.requesterId === currentUserId && req.status === 'accepted');
     
-    // Combine with default mock data if needed, or just use stored events.
-    // For this prototype, we'll start with storedEvents. 
-    // If empty, we can show a few mocks or just "No events".
-    // Let's mix them so the user sees something initially, then their new event appears.
-    
-    const defaultEvents = [
-        {
-            id: 1,
-            title: "Saturday Morning Hike",
-            date: "Sat, Jan 15 • 7:00 AM",
-            location: "Shivapuri Nagarjun National Park",
-            image: "../assets/trek.jpg"
-        },
-        {
-            id: 2,
-            title: "Tech Meetup Kathmandu",
-            date: "Fri, Jan 21 • 4:00 PM",
-            location: "Thamel, Kathmandu",
-            image: "../assets/wallpaperflare.com_wallpaper(1).jpg"
-        }
-    ];
+    const myJoinedEvents = myAcceptedRequests.map(req => {
+        // Find the event details from storedEvents (or potentially backend in future)
+        return storedEvents.find(e => e.id == req.eventId);
+    }).filter(e => e !== undefined); // Filter out any undefineds if event was deleted
 
-    // Combine: Newest created events first
-    // Only show default events if user hasn't created any, or just show them always?
-    // User requested "events that is not even mine" fix. 
-    // Assuming "My Events" should ONLY show what I created/joined.
-    // For now, let's keep defaultEvents for visual population but strictly filter the `storedEvents`.
-    // Actually, to fully "fix" it, I should probably remove the defaultEvents or make them "public" events I joined.
-    // Let's assume defaultEvents are "joined" by everyone for demo purposes, 
-    // BUT since the user complained, let's only show `userEvents`.
+    // Combine created and joined events
+    // Using a Map to remove duplicates if any (though logic shouldn't allow overlap ideally)
+    const combinedEvents = [...myCreatedEvents, ...myJoinedEvents];
+    const uniqueEvents = Array.from(new Map(combinedEvents.map(item => [item.id, item])).values());
     
-    let allEvents = [...userEvents.reverse()];
-
-    // Fallback: If no personal events, show defaults so page isn't empty (Demo mode)
-    // OR better: Only show user's events to be "correct".
-    // Let's just show userEvents to be strictly correct per request.
-    // But if list is empty, user might think it's broken.
-    // Let's stick to userEvents only.
+    // Sort by date (newest first) - assuming ID is timestamp based or just reverse
+    const finalEvents = uniqueEvents.sort((a, b) => b.id - a.id);
     
-    if (allEvents.length === 0) {
-        eventsContainer.innerHTML = '<div class="no-events">You haven\'t joined any events yet.</div>';
+    if (finalEvents.length === 0) {
+        eventsContainer.innerHTML = '<div class="no-events">You haven\'t joined or created any events yet.</div>';
         return;
     }
 
     eventsContainer.innerHTML = '';
-    allEvents.forEach(event => {
+    finalEvents.forEach(event => {
         const card = document.createElement('div');
         card.className = 'event-card';
         // Make the whole card clickable

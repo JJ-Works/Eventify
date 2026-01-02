@@ -91,7 +91,7 @@ background: url(../assets/SL-120722-54440-04.jpg) center;
     padding: 0.75rem 1rem;
     border: none; /* Remove border */
     border-radius: 1.5rem;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     background-color: var(--neumorphic-bg); /* Match background */
     color: var(--text-color);
     outline: none;
@@ -185,27 +185,24 @@ background: url(../assets/SL-120722-54440-04.jpg) center;
 }
 
 .profile-avatar {
-    width: 4rem;
-    height: 4rem;
+    width: 3rem;
+    height: 3rem;
     border-radius: 50%;
     cursor: pointer;
-    border: none; /* Remove border, rely on shadows */
-     background: url("../assets/user.png") no-repeat center;
-    background-size: 50%;
-    background-attachment:fixed ;
+    border: none;
+    background-color: var(--neumorphic-bg);
     transition: all 0.3s ease;
-    box-shadow: 5px 5px 10px var(--neumorphic-shadow-dark), 
-                -5px -5px 10px var(--neumorphic-shadow-light);
+    box-shadow: 3px 3px 6px var(--neumorphic-shadow-dark), 
+                -3px -3px 6px var(--neumorphic-shadow-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
 .profile-avatar:hover {
     box-shadow: inset 2px 2px 5px var(--neumorphic-shadow-dark), 
-                inset -2px -2px 5px var(--neumorphic-shadow-light); /* Pressed effect on hover */
-}
-
-.profile-avatar:active {
-    box-shadow: inset 3px 3px 7px var(--neumorphic-shadow-dark), 
-                inset -3px -3px 7px var(--neumorphic-shadow-light); /* Deeper pressed effect on click */
+                inset -2px -2px 5px var(--neumorphic-shadow-light);
 }
 
 .profile-avatar-btn {

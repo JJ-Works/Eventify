@@ -19,6 +19,8 @@ let currentStep = 1;
 function nextStep() {
     const errorMsg = document.getElementById('step1Error');
     const locationSelect = document.getElementById('eventLocation');
+    const eventDate = document.getElementById('eventDate');
+    const maxParticipants = document.getElementById('maxParticipants');
 
     if (currentStep === 1) {
         if (!locationSelect.value) {
@@ -26,6 +28,17 @@ function nextStep() {
             errorMsg.textContent = 'Please select a location.';
             return;
         }
+        if (!eventDate.value) {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent = 'Please select a date and time.';
+            return;
+        }
+        if (!maxParticipants.value || maxParticipants.value < 1) {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent = 'Please enter a valid number of participants.';
+            return;
+        }
+
         errorMsg.style.display = 'none';
         showStep(2);
     }
@@ -54,6 +67,8 @@ function submitEvent(event) {
     const name = document.getElementById('eventName').value;
     const description = document.getElementById('eventDescription').value;
     const location = document.getElementById('eventLocation').value;
+    const eventDateInput = document.getElementById('eventDate').value;
+    const maxParticipants = document.getElementById('maxParticipants').value;
     const step2Error = document.getElementById('step2Error');
 
     // Validation
@@ -71,16 +86,22 @@ function submitEvent(event) {
 
     step2Error.style.display = 'none';
 
+    // Format date for display
+    const dateObj = new Date(eventDateInput);
+    const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + " • " + dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
     // Log the data (Mock submission)
     const userId = localStorage.getItem('userId');
     const eventData = {
         id: Date.now(), // Simple unique ID
         userId: userId, // Associate event with user
         location,
+        eventDate: eventDateInput, // Store ISO format for DB matching
+        maxParticipants: parseInt(maxParticipants),
         topic,
         title: name, // Profile.js expects 'title'
         description,
-        date: new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + " • " + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        date: formattedDate, // Store formatted string for display
         image: "../assets/bgForcards.jpg", // Default placeholder
         createdAt: new Date().toISOString()
     };
