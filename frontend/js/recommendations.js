@@ -39,17 +39,19 @@ async function loadRecommendations() {
             processedEvents = [];
         }
 
-        let events = processedEvents;
+        // Merge with local events
+        const storedEvents = JSON.parse(localStorage.getItem('myEvents') || '[]');
+        let events = [...storedEvents.reverse(), ...processedEvents];
         
         if (events.length === 0) {
-            console.log('No events received from API after processing.');
+            console.log('No events received from API or local storage.');
             eventsGrid.innerHTML = '<p class="error-message">No events found. Check back soon!</p>';
             return;
         }
 
-        // Limit to 4 events for landing page (changed to 6 previously)
+        // Limit to 8 events for landing page
         events = events.slice(0, 8);
-        console.log('Processed events (limited to 6):', events);
+        console.log('Processed events (limited to 8):', events);
         
         // Clear skeleton loaders
         eventsGrid.innerHTML = '';
@@ -86,6 +88,10 @@ function createEventCard(event) {
     const formattedDate = formatDate(event.eventDate);
     const formattedTime = formatTime(event.eventDate);
     
+    // Determine image source (backend uses imageUrl, frontend mocks use image)
+    // Handle empty strings by using || operator which treats "" as falsy
+    let imageSrc = event.image || event.imageUrl || 'assets/bgForcards.jpg';
+    
     console.log('Event details:', {
         title: event.title,
         date: formattedDate,
@@ -94,7 +100,7 @@ function createEventCard(event) {
     });
     
     card.innerHTML = `
-        <img src="assets/bgforcards.jpg" alt="Event Image" class="event-card-image">
+        <img src="${imageSrc}" alt="Event Image" class="event-card-image">
         <div class="event-card-body">
             <p class="event-card-date-small">${formattedDate}</p>
             <h3 class="event-card-title-new">${escapeHtml(event.title)}</h3>

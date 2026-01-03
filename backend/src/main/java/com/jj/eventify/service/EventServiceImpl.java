@@ -3,6 +3,7 @@ package com.jj.eventify.service;
 import com.jj.eventify.model.Event;
 import com.jj.eventify.model.EventParticipant;
 import com.jj.eventify.repository.EventRepository;
+import com.jj.eventify.repository.JoinRequestRepository;
 import com.jj.eventify.repository.ParticipationRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +14,14 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
     private final ParticipationRepository participationRepository;
+    private final JoinRequestRepository joinRequestRepository;
 
     public EventServiceImpl(EventRepository eventRepository,
-                            ParticipationRepository participationRepository) {
+                            ParticipationRepository participationRepository,
+                            JoinRequestRepository joinRequestRepository) {
         this.eventRepository = eventRepository;
         this.participationRepository = participationRepository;
+        this.joinRequestRepository = joinRequestRepository;
     }
 
     @Override
@@ -68,4 +72,10 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findByCategory(interest);
     }
 
+    @Override
+    public void deleteAllEvents() {
+        participationRepository.deleteAll();
+        joinRequestRepository.deleteAll();
+        eventRepository.deleteAll();
+    }
 }

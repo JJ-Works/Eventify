@@ -106,6 +106,17 @@
                     <h2>Tell us about your event</h2>
 
                     <div class="form-group">
+                        <label>Cover Photo</label>
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="eventImage" accept="image/*" class="file-input">
+                            <div class="image-preview" id="imagePreviewContainer" style="display: none;">
+                                <img id="imagePreview" src="" alt="Cover Photo Preview">
+                                <button type="button" class="remove-image-btn" onclick="removeImage()">×</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label for="eventTopic">Topic</label>
                         <input type="text" id="eventTopic" name="topic" placeholder="e.g. Hiking, Coding, Music">
                     </div>

@@ -13,4 +13,5 @@ public interface EventService {
 
     List<Event> getRecommendedEvents(String interest);
 
+    void deleteAllEvents(); // NEW
 }

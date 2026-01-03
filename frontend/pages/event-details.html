@@ -11,6 +11,14 @@
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/avatar.css">
     <style>
+        .event-creator {
+            font-size: 1.1rem;
+            color: #666;
+            margin-top: -1rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
         .join-section {
             margin-top: 2rem;
             border-top: 1px solid #eee;
@@ -93,6 +101,7 @@
             </div>
             <div class="event-details-content">
                 <h1 class="event-title"></h1>
+                <p class="event-creator"></p>
                 <p class="event-description"></p>
                 <div class="event-info">
                     <span class="event-date"></span>
@@ -167,7 +176,17 @@
         }
 
         async function displayEventDetails(event) {
+            // Update Image
+            const imgElement = document.querySelector('.event-details-image img');
+            if (imgElement) {
+                imgElement.src = event.image || event.imageUrl || '../assets/bgForcards.jpg';
+            }
+
             document.querySelector('.event-title').textContent = event.title || 'Untitled Event';
+            
+            const creatorName = event.creatorName || (event.host ? event.host.name : 'Unknown Host');
+            document.querySelector('.event-creator').textContent = `Hosted by ${creatorName}`;
+
             document.querySelector('.event-description').textContent = event.description || 'No description available';
             document.querySelector('.event-date').textContent = `📅 ${event.date || 'TBA'}`;
             document.querySelector('.event-location').textContent = `📍 ${event.location || 'Location TBA'}`;
@@ -272,21 +291,77 @@
         }
 
         function updateButtonState(btn, input, status) {
+            // Remove any existing "Leave" button first to avoid duplicates
+            const existingLeaveBtn = document.querySelector('.leave-btn');
+            if (existingLeaveBtn) existingLeaveBtn.remove();
+
             if (status === 'accepted') {
                 btn.textContent = 'Joined';
                 btn.disabled = true;
                 btn.style.backgroundColor = '#2ecc71';
                 input.style.display = 'none';
+
+                // Create Leave Button
+                const leaveBtn = document.createElement('button');
+                leaveBtn.textContent = 'Leave Event';
+                leaveBtn.className = 'leave-btn btn'; 
+                leaveBtn.style.backgroundColor = '#e74c3c';
+                leaveBtn.style.marginLeft = '10px';
+                
+                leaveBtn.onclick = leaveEvent;
+                
+                // Append next to the join button
+                btn.parentNode.appendChild(leaveBtn);
+
             } else if (status === 'pending') {
                 btn.textContent = 'Request Sent';
                 btn.disabled = true;
                 btn.style.backgroundColor = '#95a5a6';
                 input.style.display = 'none';
             } else if (status === 'rejected') {
-                btn.textContent = 'Join Request Rejected'; // Optional feedback
-                // Maybe allow re-applying? For now disable.
+                btn.textContent = 'Join Request Rejected'; 
                 btn.disabled = true; 
                 input.style.display = 'none';
+            } else {
+                // Reset state (e.g. if leaving)
+                btn.textContent = 'Join Event';
+                btn.disabled = false;
+                btn.style.backgroundColor = ''; // Reset to default CSS
+                input.style.display = 'block';
+                input.value = '';
+            }
+        }
+
+        function leaveEvent() {
+            if (!confirm('Are you sure you want to leave this event?')) return;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('id');
+            const userId = localStorage.getItem('userId');
+
+            if (!eventId || !userId) return;
+
+            // 1. Remove from eventRequests (localStorage)
+            let allRequests = JSON.parse(localStorage.getItem('eventRequests') || '[]');
+            const initialLength = allRequests.length;
+            allRequests = allRequests.filter(req => !(req.eventId == eventId && req.requesterId == userId));
+            
+            if (allRequests.length < initialLength) {
+                localStorage.setItem('eventRequests', JSON.stringify(allRequests));
+                
+                // 2. Remove from joinRequestsSent (legacy fallback)
+                let requestsSent = JSON.parse(localStorage.getItem('joinRequestsSent') || '[]');
+                requestsSent = requestsSent.filter(id => id != eventId);
+                localStorage.setItem('joinRequestsSent', JSON.stringify(requestsSent));
+
+                alert('You have left the event.');
+                
+                // Update UI immediately without reload
+                const joinBtn = document.querySelector('.join-btn');
+                const joinReasonInput = document.getElementById('joinReason');
+                updateButtonState(joinBtn, joinReasonInput, null); // null status resets to default
+            } else {
+                alert('Error: Could not find your participation record.');
             }
         }
     </script>

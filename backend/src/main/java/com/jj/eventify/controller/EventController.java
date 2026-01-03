@@ -88,6 +88,13 @@ public class EventController {
         return eventService.getRecommendedEvents(interest);
     }
 
+    // Delete all events
+    @DeleteMapping("/delete-all")
+    public void deleteAllEvents() {
+        eventService.deleteAllEvents();
+    }
+
+
 
 
 }

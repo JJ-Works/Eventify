@@ -12,9 +12,50 @@ document.addEventListener('DOMContentLoaded', () => {
             charCount.classList.remove('error');
         }
     });
+
+    // Image Upload Listener
+    const imageInput = document.getElementById('eventImage');
+    if (imageInput) {
+        imageInput.addEventListener('change', handleImageUpload);
+    }
 });
 
 let currentStep = 1;
+let uploadedImageBase64 = null;
+
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        // Basic validation
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file.');
+            event.target.value = '';
+            return;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            alert('File is too large. Max 5MB.');
+            event.target.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            uploadedImageBase64 = e.target.result;
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const previewImg = document.getElementById('imagePreview');
+            previewImg.src = uploadedImageBase64;
+            previewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function removeImage() {
+    uploadedImageBase64 = null;
+    document.getElementById('eventImage').value = '';
+    document.getElementById('imagePreviewContainer').style.display = 'none';
+}
 
 function nextStep() {
     const errorMsg = document.getElementById('step1Error');
@@ -92,9 +133,11 @@ function submitEvent(event) {
 
     // Log the data (Mock submission)
     const userId = localStorage.getItem('userId');
+    const userName = localStorage.getItem('userName') || 'Unknown User';
     const eventData = {
         id: Date.now(), // Simple unique ID
         userId: userId, // Associate event with user
+        creatorName: userName,
         location,
         eventDate: eventDateInput, // Store ISO format for DB matching
         maxParticipants: parseInt(maxParticipants),
@@ -102,7 +145,7 @@ function submitEvent(event) {
         title: name, // Profile.js expects 'title'
         description,
         date: formattedDate, // Store formatted string for display
-        image: "../assets/bgForcards.jpg", // Default placeholder
+        image: uploadedImageBase64 || "../assets/bgForcards.jpg", // Use uploaded image or default
         createdAt: new Date().toISOString()
     };
     

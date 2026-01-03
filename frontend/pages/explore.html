@@ -188,9 +188,15 @@
             noResults.style.display = 'none';
             grid.innerHTML = events.map(event => {
                 const formattedDate = formatDate(event.eventDate);
+                // Handle image logic: 
+                // 1. event.image (Local storage / frontend mock, often base64)
+                // 2. event.imageUrl (Backend URL)
+                // 3. Fallback
+                let imageSrc = event.image || event.imageUrl || '../assets/bgForcards.jpg';
+                
                 return `
                     <div class="event-card" data-event-id="${event.id}">
-                        <img src="../assets/bgforcards.jpg" alt="Event Image" class="event-card-image">
+                        <img src="${imageSrc}" alt="Event Image" class="event-card-image">
                         <div class="event-card-body">
                             <p class="event-card-date-small">${formattedDate}</p>
                             <h3 class="event-card-title-new">${escapeHtml(event.title || 'Untitled Event')}</h3>
