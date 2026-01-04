@@ -7,6 +7,7 @@ public interface EventService {
     Event saveEvent(Event event);
     Event getEventById(Long id);
     List<Event> getAllEvents();
+    List<Event> searchEvents(String query, String location);
     void deleteEvent(Long id);
 
     void deleteEventById(Long id);

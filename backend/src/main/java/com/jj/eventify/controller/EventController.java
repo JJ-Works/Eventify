@@ -44,6 +44,13 @@ public class EventController {
         return eventService.getAllEvents();
     }
 
+    // Search events
+    @GetMapping("/search")
+    public List<Event> searchEvents(@RequestParam(required = false) String query,
+                                    @RequestParam(required = false) String location) {
+        return eventService.searchEvents(query, location);
+    }
+
     // Delete event
 
     @DeleteMapping("/{id}")

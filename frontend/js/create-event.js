@@ -101,7 +101,7 @@ function showStep(step) {
     document.getElementById(`dot${currentStep}`).classList.add('active');
 }
 
-function submitEvent(event) {
+async function submitEvent(event) {
     event.preventDefault();
     
     const topic = document.getElementById('eventTopic').value;
@@ -111,6 +111,7 @@ function submitEvent(event) {
     const eventDateInput = document.getElementById('eventDate').value;
     const maxParticipants = document.getElementById('maxParticipants').value;
     const step2Error = document.getElementById('step2Error');
+    const imageInput = document.getElementById('eventImage');
 
     // Validation
     if (!topic || !name || !description) {
@@ -127,36 +128,72 @@ function submitEvent(event) {
 
     step2Error.style.display = 'none';
 
-    // Format date for display
-    const dateObj = new Date(eventDateInput);
-    const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + " • " + dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    try {
+        // 1. Upload Image if exists
+        let imageUrl = "../assets/bgForcards.jpg"; // default
+        if (imageInput.files[0]) {
+            const formData = new FormData();
+            formData.append("file", imageInput.files[0]);
 
-    // Log the data (Mock submission)
-    const userId = localStorage.getItem('userId');
-    const userName = localStorage.getItem('userName') || 'Unknown User';
-    const eventData = {
-        id: Date.now(), // Simple unique ID
-        userId: userId, // Associate event with user
-        creatorName: userName,
-        location,
-        eventDate: eventDateInput, // Store ISO format for DB matching
-        maxParticipants: parseInt(maxParticipants),
-        topic,
-        title: name, // Profile.js expects 'title'
-        description,
-        date: formattedDate, // Store formatted string for display
-        image: uploadedImageBase64 || "../assets/bgForcards.jpg", // Use uploaded image or default
-        createdAt: new Date().toISOString()
-    };
-    
-    // Save to localStorage (Simulating DB)
-    const storedEvents = JSON.parse(localStorage.getItem('myEvents') || '[]');
-    storedEvents.push(eventData);
-    localStorage.setItem('myEvents', JSON.stringify(storedEvents));
-    
-    console.log('Event Created:', eventData);
-    alert('Event created successfully!');
-    
-    // Redirect to profile page to see the event
-    window.location.href = 'profile.html';
+            const uploadRes = await fetch('http://localhost:8080/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (uploadRes.ok) {
+                const data = await uploadRes.json();
+                imageUrl = data.url;
+            } else {
+                console.error("Image upload failed");
+            }
+        }
+
+        // 2. Prepare Event Object
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            alert("You must be logged in to create an event.");
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Fetch user object to set as host (Required by backend entity)
+        // This is a bit of a workaround because the entity needs the full User object
+        // In a real JWT setup, backend would extract user from token.
+        // For now, we'll fetch the user first.
+        const userRes = await fetch(`http://localhost:8080/users/${userId}`);
+        if (!userRes.ok) throw new Error("Could not fetch user details");
+        const hostUser = await userRes.json();
+
+        const eventData = {
+            title: name,
+            description: description,
+            category: topic,
+            location: location,
+            eventDate: eventDateInput, // ISO format
+            maxParticipants: parseInt(maxParticipants),
+            imageUrl: imageUrl,
+            host: hostUser // Pass the full user object
+        };
+
+        // 3. Send to Backend
+        const response = await fetch('http://localhost:8080/events/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(eventData)
+        });
+
+        if (response.ok) {
+            alert('Event created successfully!');
+            window.location.href = 'profile.html';
+        } else {
+            const err = await response.json();
+            alert('Failed to create event: ' + (err.message || 'Unknown error'));
+        }
+
+    } catch (error) {
+        console.error('Error creating event:', error);
+        alert('An error occurred. Please try again.');
+    }
 }

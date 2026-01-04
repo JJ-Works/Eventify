@@ -125,3 +125,24 @@ function setUserLoggedIn(token, userId, userName, userEmail, userInterest = null
     // Update UI
     checkAuthStatus();
 }
+
+function performSearch(event) {
+    event.preventDefault();
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        const query = searchInput.value.trim();
+        if (query) {
+            // Determine path to explore.html
+            const currentPath = window.location.pathname;
+            let targetUrl = 'explore.html';
+            
+            // If we are in root (index.html), go to pages/explore.html
+            // If we are in pages/, go to explore.html
+            if (!currentPath.includes('/pages/')) {
+                targetUrl = 'pages/explore.html';
+            }
+
+            window.location.href = `${targetUrl}?query=${encodeURIComponent(query)}`;
+        }
+    }
+}

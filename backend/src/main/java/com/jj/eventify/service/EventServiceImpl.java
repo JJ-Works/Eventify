@@ -68,6 +68,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public List<Event> searchEvents(String query, String location) {
+        return eventRepository.searchEvents(query, location);
+    }
+
+    @Override
     public List<Event> getRecommendedEvents(String interest) {
         return eventRepository.findByCategory(interest);
     }

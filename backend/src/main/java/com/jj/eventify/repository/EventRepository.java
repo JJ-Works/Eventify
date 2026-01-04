@@ -12,4 +12,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findByCategory(String category);
 
+    @org.springframework.data.jpa.repository.Query("SELECT e FROM Event e WHERE " +
+            "(:query IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(e.description) LIKE LOWER(CONCAT('%', :query, '%'))) AND " +
+            "(:location IS NULL OR LOWER(e.location) LIKE LOWER(CONCAT('%', :location, '%')))")
+    List<Event> searchEvents(String query, String location);
 }
