@@ -143,7 +143,9 @@ const Auth = {
     },
     requireAuth: () => {
         if (!localStorage.getItem('user')) {
-            window.location.href = 'login.html';
+            const isRoot = !window.location.pathname.includes('/pages/');
+            const prefix = isRoot ? 'pages/' : '';
+            window.location.href = `${prefix}login.html`;
         }
     }
 };

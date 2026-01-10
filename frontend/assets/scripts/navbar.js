@@ -43,6 +43,7 @@ function renderNavbar() {
                 ${searchBarHtml}
                 <div class="nav-links">
                     <a href="${rootPrefix}index.html" class="nav-link">Home</a>
+                    <a href="${prefix}dashboard.html" class="nav-link">Explore</a>
                     <a href="${prefix}login.html" class="btn btn-secondary" style="padding: 8px 16px;">Login</a>
                     <a href="${prefix}register.html" class="btn btn-primary" style="padding: 8px 16px;">Sign Up</a>
                 </div>

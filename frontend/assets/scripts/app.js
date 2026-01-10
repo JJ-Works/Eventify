@@ -1,10 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Protected Route Check
-    Auth.requireAuth();
+    if (window.location.pathname.includes('create-event.html')) {
+        Auth.requireAuth();
+    }
 
     const user = Auth.getUser();
     const userNameDisplay = document.getElementById('userNameDisplay');
-    if (userNameDisplay) userNameDisplay.textContent = user.name;
+    if (userNameDisplay && user) userNameDisplay.textContent = user.name;
 
     // Search Listener
     window.addEventListener('eventSearch', (e) => {
@@ -46,11 +48,11 @@ async function loadEvents() {
 
         // Fetch statuses for all events to show correct button state
         const eventsWithStatus = await Promise.all(events.map(async (event) => {
-            const isHost = event.host && event.host.id === user.id;
-            const isJoined = event.participants && event.participants.some(p => p.id === user.id);
+            const isHost = user && event.host && event.host.id === user.id;
+            const isJoined = user && event.participants && event.participants.some(p => p.id === user.id);
             let status = 'NONE';
             
-            if (!isHost && !isJoined) {
+            if (user && !isHost && !isJoined) {
                 const statusData = await API.getJoinStatus(event.id, user.id);
                 status = statusData.status;
             }
@@ -91,6 +93,8 @@ function filterEventsLocally(query) {
 
 function renderEventsList(events) {
     const container = document.getElementById('eventsContainer');
+    const user = Auth.getUser();
+
     if (events.length === 0) {
         container.innerHTML = '<p>No events match your search.</p>';
         return;
@@ -98,7 +102,9 @@ function renderEventsList(events) {
 
     container.innerHTML = events.map(event => {
         let actionBtn = '';
-        if (event.isHost) {
+        if (!user) {
+            actionBtn = `<button onclick="event.stopPropagation(); window.location.href='login.html'" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">Join</button>`;
+        } else if (event.isHost) {
             actionBtn = `<span class="user-tag" style="background:#e0e7ff; color:var(--primary)">Hosting</span>`;
         } else if (event.isJoined) {
             actionBtn = `<button class="btn btn-secondary" disabled style="padding: 6px 12px; font-size: 0.8rem; background: #d1fae5; color: #065f46; border:none;">Joined</button>`;

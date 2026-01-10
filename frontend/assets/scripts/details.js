@@ -3,8 +3,6 @@ let currentEventId = null;
 let chatInterval = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    Auth.requireAuth();
-    
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
 
@@ -23,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (chatForm) {
             chatForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                Auth.requireAuth(); // Ensure logged in to chat
                 const input = document.getElementById('chatInput');
                 const content = input.value.trim();
                 
@@ -81,10 +80,12 @@ function renderEventDetails(event) {
 
     // Action Button Logic
     const actionContainer = document.getElementById('actionContainer');
-    const isHost = event.host && event.host.id === user.id;
-    const isJoined = event.participants && event.participants.some(p => p.id === user.id);
+    const isHost = user && event.host && event.host.id === user.id;
+    const isJoined = user && event.participants && event.participants.some(p => p.id === user.id);
 
-    if (isHost) {
+    if (!user) {
+        actionContainer.innerHTML = `<button onclick="window.location.href='login.html'" class="btn btn-primary" style="width:100%;">Join Event</button>`;
+    } else if (isHost) {
         actionContainer.innerHTML = `
             <p class="text-muted" style="margin-bottom:10px;">You are hosting this event.</p>
             <button id="deleteBtn" class="btn btn-danger" style="width:100%; background-color: var(--danger); color: white;">Delete Event</button>
@@ -146,14 +147,14 @@ function renderParticipants(event) {
     const countDisplay = document.getElementById('participantCount');
     const currentUser = Auth.getUser();
     
-    const isParticipant = event.participants && event.participants.some(p => p.id === currentUser.id);
-    const isHost = event.host && event.host.id === currentUser.id;
+    const isParticipant = currentUser && event.participants && event.participants.some(p => p.id === currentUser.id);
+    const isHost = currentUser && event.host && event.host.id === currentUser.id;
 
     if (event.participants && event.participants.length > 0) {
         countDisplay.textContent = `${event.participants.length} going`;
         participantList.innerHTML = event.participants.map(p => {
-            const isMe = p.id === currentUser.id;
-            const isTargetHost = p.id === event.host.id;
+            const isMe = currentUser && p.id === currentUser.id;
+            const isTargetHost = event.host && p.id === event.host.id;
             
             // Message button for participants
             const messageBtn = (isParticipant && !isMe) 
