@@ -11,4 +11,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
            "((m.sender.id = :u1 AND m.receiver.id = :u2) OR (m.sender.id = :u2 AND m.receiver.id = :u1)) " +
            "ORDER BY m.timestamp ASC")
     List<Message> findChatHistory(Long eventId, Long u1, Long u2);
+
+    void deleteByEventId(Long eventId);
 }

@@ -33,6 +33,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let allEventsCache = []; // Store all events for filtering
 
+function showMessage(type, text) {
+    const authMessage = document.getElementById('authMessage');
+    if (!authMessage) {
+        alert(text);
+        return;
+    }
+    authMessage.textContent = text;
+    authMessage.className = `auth-message ${type}`;
+    authMessage.style.display = 'block';
+    
+    if (type === 'error') {
+        setTimeout(() => {
+            authMessage.style.display = 'none';
+        }, 5000);
+    }
+}
+
 async function loadEvents() {
     const container = document.getElementById('eventsContainer');
     const user = Auth.getUser();
@@ -140,10 +157,13 @@ async function handleCreateEvent(e) {
     e.preventDefault();
     const btn = e.target.querySelector('button');
     const user = Auth.getUser();
+    const authMessage = document.getElementById('authMessage');
 
     try {
         btn.disabled = true;
+        const originalText = 'Create Event';
         btn.textContent = 'Processing...';
+        if(authMessage) authMessage.style.display = 'none';
 
         // 1. Upload Image (if selected)
         let imageUrl = null;
@@ -151,9 +171,6 @@ async function handleCreateEvent(e) {
         if (imageInput.files.length > 0) {
             btn.textContent = 'Uploading Image...';
             const uploadRes = await API.uploadImage(imageInput.files[0]);
-            // Backend returns relative path "/uploads/...", we prepend server base if needed
-            // But browsers handle relative URLs fine if on same domain.
-            // Since frontend is static (port 5500) and backend is 8080, we need full URL.
             imageUrl = `http://localhost:8080${uploadRes.url}`;
         }
 
@@ -169,10 +186,15 @@ async function handleCreateEvent(e) {
         };
         
         await API.createEvent(eventData);
-        alert('Success! Event created.');
-        window.location.href = 'dashboard.html';
+        
+        showMessage('success', 'Success! Event created. Redirecting to dashboard...');
+        
+        setTimeout(() => {
+            window.location.href = 'dashboard.html';
+        }, 2000);
+
     } catch (error) {
-        alert(error.message);
+        showMessage('error', error.message);
         btn.disabled = false;
         btn.textContent = 'Create Event';
     }

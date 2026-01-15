@@ -5,8 +5,11 @@ import com.jj.eventify.model.JoinRequest;
 import com.jj.eventify.model.User;
 import com.jj.eventify.repository.EventRepository;
 import com.jj.eventify.repository.JoinRequestRepository;
+import com.jj.eventify.repository.MessageRepository;
 import com.jj.eventify.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -15,13 +18,16 @@ public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final JoinRequestRepository joinRequestRepository;
+    private final MessageRepository messageRepository;
 
-
-
-    public EventService(EventRepository eventRepository, UserRepository userRepository, JoinRequestRepository joinRequestRepository) {
+    public EventService(EventRepository eventRepository, 
+                        UserRepository userRepository, 
+                        JoinRequestRepository joinRequestRepository,
+                        MessageRepository messageRepository) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.joinRequestRepository = joinRequestRepository;
+        this.messageRepository = messageRepository;
     }
 
     public Event createEvent(Event event) {
@@ -97,7 +103,16 @@ public class EventService {
                 .orElse("NONE");
     }
 
+    @Transactional
     public void deleteEvent(Long eventId) {
+        // 1. Delete all join requests for this event
+        joinRequestRepository.deleteByEventId(eventId);
+        
+        // 2. Delete all messages for this event
+        messageRepository.deleteByEventId(eventId);
+
+        // 3. Delete the event (participants relation is handled by JPA if owning side, but let's be sure)
+        // Event is owning side of participants (@JoinTable), so it should be fine.
         eventRepository.deleteById(eventId);
     }
 }

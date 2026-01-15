@@ -1,7 +1,6 @@
 /* Auth specific styles */
 
-.container{
-    margin-bottom: 2vh;
+.auth-container{
     width: 50vw;
 }
 
@@ -38,4 +37,26 @@
     color: var(--primary);
     text-decoration: none;
     font-weight: 500;
+}
+
+.auth-message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    display: none; /* Hidden by default */
+}
+
+.auth-message.success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    display: block;
+}
+
+.auth-message.error {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    display: block;
 }

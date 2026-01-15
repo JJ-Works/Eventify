@@ -9,7 +9,7 @@
     border: 1px solid #f1f5f9;
     
     /* Fixed width relative to viewport as requested */
-    width: 60vw;
+    width: 50vw;
     margin: 0 auto;
     min-height: 50vh; /* Ensure the grid has a presence even with few items */
 }

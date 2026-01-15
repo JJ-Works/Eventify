@@ -18,10 +18,11 @@
         </div>
     </nav>
 
-    <div class="container" style="display: flex; justify-content: center; margin-top: 3rem; margin-bottom: 3rem;">
-        <div class="auth-card" style="width: 40vw; max-width: none;">
+    <div class="container auth-container" style="display: flex; justify-content: center; margin-top: 3rem; margin-bottom: 3rem;">
+        <div class="auth-card" style="width: 30vw; max-width: 500px;">
             <h1 class="auth-title" style="margin-bottom: 2rem;">Create New Event</h1>
             
+            <div id="authMessage" class="auth-message"></div>
             <form id="createEventForm">
                 <div class="form-group">
                     <label for="title" class="form-label">Event Title</label>
@@ -55,6 +56,7 @@
 
     <script src="../assets/scripts/api.js"></script>
     <script src="../assets/scripts/navbar.js"></script>
+    <script src="../assets/scripts/auth.js"></script>
     <script src="../assets/scripts/app.js"></script>
 </body>
 </html>
