@@ -1,8 +1,10 @@
 /* Auth specific styles */
 
 .auth-container{
-
-    width: 50vw;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0 12px;
 }
 
 .auth-wrapper {
@@ -35,6 +37,18 @@
     box-shadow: var(--shadow);
     width: 100%;
     max-width: 450px;
+}
+
+/* Small screens: make the card take most of viewport width */
+@media (max-width: 480px) {
+    .auth-card {
+        max-width: 95vw;
+        padding: 1.25rem;
+    }
+
+    .auth-container {
+        padding: 0 8px;
+    }
 }
 
 .auth-header {

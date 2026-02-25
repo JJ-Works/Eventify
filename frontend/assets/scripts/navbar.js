@@ -13,7 +13,8 @@ function renderNavbar() {
     const rootPrefix = isRoot ? '' : '../';
     const assetsPrefix = isRoot ? 'assets/' : '../assets/';
 
-    navMenu.style.flex = '1'; // Ensure it takes available space
+    // Remove flex: 1 that was preventing responsive shrinking
+    // navMenu.style.flex = '1';
 
     const searchBarHtml = `
         <div class="nav-search">
@@ -43,11 +44,16 @@ function renderNavbar() {
 
     navMenu.innerHTML = `
         <div class="nav-inner">
-            ${searchBarHtml}
+            <div class="nav-search-desktop">
+                ${searchBarHtml}
+            </div>
             <button id="burgerBtn" class="burger-btn">
                 <img src="${assetsPrefix}images/burger-menu-svgrepo-com.svg" alt="Menu">
             </button>
             <div class="nav-links" id="navLinks">
+                <div class="nav-search-mobile">
+                    ${searchBarHtml}
+                </div>
                 ${linksHtml}
             </div>
         </div>
@@ -59,6 +65,13 @@ function renderNavbar() {
     if (burgerBtn && navLinks) {
         burgerBtn.addEventListener('click', () => {
             navLinks.classList.toggle('active');
+        });
+
+        // Close menu when a link is clicked
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
         });
     }
 
@@ -75,33 +88,32 @@ function renderNavbar() {
         }
     });
 
-    // Add search listener
-    const searchInput = document.getElementById('globalSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            // Trigger a custom event that pages can listen to
-            window.dispatchEvent(new CustomEvent('eventSearch', { detail: query }));
-        });
+    // Add search listener (works for both desktop and mobile)
+    const searchInputs = document.querySelectorAll('#globalSearch');
+    searchInputs.forEach(searchInput => {
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                window.dispatchEvent(new CustomEvent('eventSearch', { detail: query }));
+            });
 
-        // Navigate to dashboard on Enter if not already there
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const isDashboard = window.location.pathname.includes('dashboard.html');
-                if (!isDashboard) {
-                    const prefix = isRoot ? 'pages/' : '';
-                    window.location.href = `${rootPrefix}${prefix}dashboard.html?q=${encodeURIComponent(searchInput.value)}`;
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const isDashboard = window.location.pathname.includes('dashboard.html');
+                    if (!isDashboard) {
+                        const prefix = isRoot ? 'pages/' : '';
+                        window.location.href = `${rootPrefix}${prefix}dashboard.html?q=${encodeURIComponent(searchInput.value)}`;
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
+    });
 }
 
 function renderFooter() {
     const footer = document.createElement('footer');
     footer.className = 'main-footer';
     
-    // Check if we are in pages/ or root
     const isRoot = !window.location.pathname.includes('/pages/');
     const homeLink = isRoot ? 'index.html' : '../index.html';
 
