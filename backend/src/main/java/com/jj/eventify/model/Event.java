@@ -26,6 +26,7 @@ public class Event {
     private String location;
     private LocalDateTime eventDate;
     private String imageUrl;
+    private Integer maxParticipants;
 
     @ManyToOne
     @JoinColumn(name = "host_id")

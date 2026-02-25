@@ -27,6 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Create Event Handler
     const createEventForm = document.getElementById('createEventForm');
     if (createEventForm) {
+        // Set minimum date to now
+        const dateInput = document.getElementById('eventDate');
+        if (dateInput) {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            dateInput.min = now.toISOString().slice(0, 16);
+        }
         createEventForm.addEventListener('submit', handleCreateEvent);
     }
 });
@@ -119,17 +126,30 @@ function renderEventsList(events) {
 
     container.innerHTML = events.map(event => {
         let actionBtn = '';
+        const currentParticipants = event.participants ? event.participants.length : 0;
+        const isFull = event.maxParticipants && currentParticipants >= event.maxParticipants;
+        
         if (!user) {
-            actionBtn = `<button onclick="event.stopPropagation(); window.location.href='login.html'" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">Join</button>`;
+            if (isFull) {
+                actionBtn = `<span class="user-tag" style="background:#fee2e2; color:#b91c1c">Full</span>`;
+            } else {
+                actionBtn = `<button onclick="event.stopPropagation(); window.location.href='login.html'" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">Join</button>`;
+            }
         } else if (event.isHost) {
             actionBtn = `<span class="user-tag" style="background:#e0e7ff; color:var(--primary)">Hosting</span>`;
         } else if (event.isJoined) {
             actionBtn = `<button class="btn btn-secondary" disabled style="padding: 6px 12px; font-size: 0.8rem; background: #d1fae5; color: #065f46; border:none;">Joined</button>`;
         } else if (event.status === 'PENDING') {
             actionBtn = `<button class="btn btn-secondary" disabled style="padding: 6px 12px; font-size: 0.8rem; background: #fef3c7; color: #92400e; border:none;">Requested</button>`;
+        } else if (isFull) {
+            actionBtn = `<span class="user-tag" style="background:#fee2e2; color:#b91c1c">Full</span>`;
         } else {
             actionBtn = `<button onclick="event.stopPropagation(); joinEvent(${event.id})" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">Join</button>`;
         }
+
+        const capacityInfo = event.maxParticipants 
+            ? `<span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">👥 ${currentParticipants}/${event.maxParticipants} participants</span>`
+            : '';
 
         return `
             <div class="event-card" onclick="window.location.href='event-details.html?id=${event.id}'">
@@ -140,6 +160,7 @@ function renderEventsList(events) {
                     <h3 class="event-title">${event.title}</h3>
                     <div class="event-info">
                         <p>📍 ${event.location}</p>
+                        ${capacityInfo}
                         <p style="margin-top: 0.5rem;">${event.description || 'No description provided.'}</p>
                     </div>
                     <div class="event-host">
@@ -159,7 +180,29 @@ async function handleCreateEvent(e) {
     const user = Auth.getUser();
     const authMessage = document.getElementById('authMessage');
 
+    const title = document.getElementById('title').value.trim();
+    const location = document.getElementById('location').value.trim();
+    const eventDateValue = document.getElementById('eventDate').value;
+    const description = document.getElementById('description').value.trim();
+    const maxParticipants = document.getElementById('maxParticipants').value;
+
     try {
+        // Form Validation
+        if (title.length < 5) throw new Error('Event title must be at least 5 characters long.');
+        if (/^\d+$/.test(title)) throw new Error('Event title cannot be only numbers.');
+        
+        if (location.length < 3) throw new Error('Location must be at least 3 characters long.');
+        if (/^\d+$/.test(location)) throw new Error('Location cannot be only numbers.');
+        
+        if (!eventDateValue) throw new Error('Please select a date and time for the event.');
+        
+        const selectedDate = new Date(eventDateValue);
+        if (selectedDate < new Date()) throw new Error('Event date and time cannot be in the past.');
+        
+        if (maxParticipants && (parseInt(maxParticipants) < 1)) throw new Error('Maximum participants must be at least 1.');
+        
+        if (description.length < 10) throw new Error('Description must be at least 10 characters long.');
+
         btn.disabled = true;
         const originalText = 'Create Event';
         btn.textContent = 'Processing...';
@@ -177,23 +220,24 @@ async function handleCreateEvent(e) {
         // 2. Create Event
         btn.textContent = 'Creating Event...';
         const eventData = {
-            title: document.getElementById('title').value,
-            description: document.getElementById('description').value,
-            location: document.getElementById('location').value,
-            eventDate: document.getElementById('eventDate').value,
+            title: title,
+            description: description,
+            location: location,
+            eventDate: eventDateValue,
+            maxParticipants: maxParticipants ? parseInt(maxParticipants) : null,
             host: { id: user.id },
             imageUrl: imageUrl
         };
         
         await API.createEvent(eventData);
         
-        showMessage('success', 'Success! Event created. Redirecting to dashboard...');
+        console.log('Event creation successful, redirecting...');
+        showMessage('success', 'Success! Event created. Redirecting...');
         
-        setTimeout(() => {
-            window.location.href = 'dashboard.html';
-        }, 2000);
+        window.location.href = 'dashboard.html';
 
     } catch (error) {
+        console.error('Event creation failed:', error);
         showMessage('error', error.message);
         btn.disabled = false;
         btn.textContent = 'Create Event';

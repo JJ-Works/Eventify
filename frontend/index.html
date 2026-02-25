@@ -43,6 +43,35 @@
         margin-left: auto;
         margin-right: auto;
       }
+
+      .stats-container {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        padding: 4rem 0;
+        flex-wrap: wrap;
+      }
+
+      .stat-card {
+        background: #ffffff;
+        padding: 20px 40px;
+        border-radius: var(--radius);
+        box-shadow: 6px 6px 12px #cfd8e3, -3px -3px 5px rgba(255, 255, 255,0.5);
+        font-weight: 700;
+        color: var(--text-main);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        min-width: 220px;
+        text-align: center;
+        font-size: 1.4rem;
+        user-select: none;
+      }
+
+      .btn:active, .stat-card:active, .event-card:active {
+        box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.2), inset -4px -4px 8px rgba(255, 255, 255, 0.7) !important;
+        transform: scale(0.98);
+      }
     </style>
   </head>
 
@@ -73,13 +102,18 @@
             >Explore Events</a
           >
         </div>
+        <div class="stats-container" style="margin-top: 0rem; position: relative; top: 8rem;">
+          <button class="stat-card">100+ events</button>
+          <button class="stat-card">3000+ participant</button>
+          <button class="stat-card">50+ partners</button>
+        </div>
       </div>
     </header>
 
     <section
       id="recommendationsSection"
       class="container"
-      style="padding: 4rem 0"
+      style="min-height: 90vh; padding: 4rem 0; display: flex; flex-direction: column; justify-content: center;"
     >
       <h2
         id="recommendationTitle"
@@ -96,6 +130,61 @@
         <p style="text-align: center; grid-column: 1/-1">
           Loading awesome events...
         </p>
+      </div>
+    </section>
+
+    <section
+      id="successfulEventsSection"
+      class="container"
+      style="padding: 4rem 0"
+    >
+      <h2
+        style="
+          font-size: 2rem;
+          font-weight: 800;
+          margin-bottom: 2rem;
+          text-align: center;
+        "
+      >
+        Successful Events
+      </h2>
+      <div class="events-grid">
+        <div class="event-card">
+          <div
+            class="event-header"
+            style="background-image: url('assets/images/conference.jpg')"
+          ></div>
+          <div class="event-body">
+            <h3 class="event-title">Annual Tech Conference</h3>
+            <p class="event-info">
+              Our biggest tech gathering yet, featuring industry leaders.
+            </p>
+          </div>
+        </div>
+        <div class="event-card">
+          <div
+            class="event-header"
+            style="background-image: url('assets/images/yoga.jpg')"
+          ></div>
+          <div class="event-body">
+            <h3 class="event-title">Community Yoga</h3>
+            <p class="event-info">
+              A peaceful morning session that brought everyone together.
+            </p>
+          </div>
+        </div>
+        <div class="event-card">
+          <div
+            class="event-header"
+            style="background-image: url('assets/images/hike.jpg')"
+          ></div>
+          <div class="event-body">
+            <h3 class="event-title">Weekend Hiking</h3>
+            <p class="event-info">
+              Exploring nature trails with our amazing community.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -159,24 +248,30 @@
             }
           }
 
-          // Fallback/Fill: Fill with latest events if no matches or to make up a set of 4
-          if (displayEvents.length < 4) {
+          // Fallback/Fill: Fill with latest events if no matches or to make up a set of 6
+          if (displayEvents.length < 6) {
             const latest = [...allEvents].sort((a, b) => b.id - a.id);
             for (const event of latest) {
-              if (displayEvents.length >= 4) break;
+              if (displayEvents.length >= 6) break;
               if (!displayEvents.find((e) => e.id === event.id)) {
                 displayEvents.push(event);
               }
             }
           } else {
-            displayEvents = displayEvents.slice(0, 4);
+            displayEvents = displayEvents.slice(0, 6);
           }
 
           grid.innerHTML = displayEvents
             .map(
-              (event) => `
+              (event) => {
+                const currentParticipants = event.participants ? event.participants.length : 0;
+                const isFull = event.maxParticipants && currentParticipants >= event.maxParticipants;
+                const fullTag = isFull ? `<span style="position: absolute; top: 10px; right: 10px; background: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">FULL</span>` : "";
+
+                return `
                     <div class="event-card" onclick="window.location.href='pages/event-details.html?id=${event.id}'">
                         <div class="event-header" style="${event.imageUrl ? `background-image: url('${event.imageUrl}');` : ""}">
+                            ${fullTag}
                         </div>
                         <div class="event-body">
                             <span class="event-date">${new Date(event.eventDate).toLocaleDateString()}</span>
@@ -191,7 +286,8 @@
                             </div>
                         </div>
                     </div>
-                `,
+                `;
+              }
             )
             .join("");
         } catch (err) {

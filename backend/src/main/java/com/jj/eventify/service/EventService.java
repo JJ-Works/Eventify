@@ -52,6 +52,10 @@ public class EventService {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         
+        if (event.getMaxParticipants() != null && event.getParticipants().size() >= event.getMaxParticipants()) {
+            throw new RuntimeException("Event is full");
+        }
+
         JoinRequest request = new JoinRequest();
         request.setEvent(event);
         request.setUser(user);
@@ -67,6 +71,10 @@ public class EventService {
         JoinRequest request = joinRequestRepository.findById(requestId).orElseThrow(() -> new RuntimeException("Request not found"));
         Event event = request.getEvent();
         User user = request.getUser();
+
+        if (event.getMaxParticipants() != null && event.getParticipants().size() >= event.getMaxParticipants()) {
+            throw new RuntimeException("Cannot approve: Event has reached its participant limit.");
+        }
 
         event.getParticipants().add(user);
         request.setStatus("APPROVED");

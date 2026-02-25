@@ -73,6 +73,18 @@ function renderEventDetails(event) {
     document.getElementById('eventDate').textContent = `📅 ${new Date(event.eventDate).toLocaleString()}`;
     document.getElementById('eventDescription').textContent = event.description || 'No description provided.';
     
+    // Capacity Display
+    const currentParticipants = event.participants ? event.participants.length : 0;
+    const isFull = event.maxParticipants && currentParticipants >= event.maxParticipants;
+    if (event.maxParticipants) {
+        const capacityDiv = document.createElement('div');
+        capacityDiv.style.marginTop = '1rem';
+        capacityDiv.style.fontWeight = '600';
+        capacityDiv.style.color = isFull ? 'var(--danger)' : 'var(--text-muted)';
+        capacityDiv.textContent = `👥 Capacity: ${currentParticipants} / ${event.maxParticipants} participants ${isFull ? '(FULL)' : ''}`;
+        document.getElementById('eventDescription').parentNode.insertBefore(capacityDiv, document.getElementById('eventDescription').nextSibling);
+    }
+
     // Sidebar: Host Info
     const hostName = event.host ? event.host.name : 'Unknown';
     document.getElementById('hostName').textContent = hostName;
@@ -84,7 +96,11 @@ function renderEventDetails(event) {
     const isJoined = user && event.participants && event.participants.some(p => p.id === user.id);
 
     if (!user) {
-        actionContainer.innerHTML = `<button onclick="window.location.href='login.html'" class="btn btn-primary" style="width:100%;">Join Event</button>`;
+        if (isFull) {
+            actionContainer.innerHTML = `<button class="btn btn-secondary" disabled style="width:100%; background: #fee2e2; color: #991b1b; border:none;">Event Full</button>`;
+        } else {
+            actionContainer.innerHTML = `<button onclick="window.location.href='login.html'" class="btn btn-primary" style="width:100%;">Join Event</button>`;
+        }
     } else if (isHost) {
         actionContainer.innerHTML = `
             <p class="text-muted" style="margin-bottom:10px;">You are hosting this event.</p>
@@ -99,7 +115,7 @@ function renderEventDetails(event) {
         `;
         document.getElementById('leaveBtn').addEventListener('click', () => leaveEventHandler(event.id, user.id));
     } else {
-        checkStatusAndRenderButton(event.id, user.id, actionContainer);
+        checkStatusAndRenderButton(event.id, user.id, actionContainer, isFull);
     }
 
     renderParticipants(event);
@@ -116,7 +132,7 @@ async function leaveEventHandler(eventId, userId) {
     }
 }
 
-async function checkStatusAndRenderButton(eventId, userId, container) {
+async function checkStatusAndRenderButton(eventId, userId, container, isFull) {
     try {
         const statusData = await API.getJoinStatus(eventId, userId);
         if (statusData.status === 'PENDING') {
@@ -125,6 +141,8 @@ async function checkStatusAndRenderButton(eventId, userId, container) {
                 <button class="btn btn-secondary" disabled style="width:100%; background: #fef3c7; color: #92400e; border:none;">⏳ Requested</button>
             `;
             document.getElementById('cancelReqBtn').addEventListener('click', () => leaveEventHandler(eventId, userId));
+        } else if (isFull) {
+            container.innerHTML = `<button class="btn btn-secondary" disabled style="width:100%; background: #fee2e2; color: #991b1b; border:none;">Event Full</button>`;
         } else {
             container.innerHTML = `<button id="joinBtn" class="btn btn-primary" style="width:100%;">Join Event</button>`;
             document.getElementById('joinBtn').addEventListener('click', () => joinEventHandler(eventId));
