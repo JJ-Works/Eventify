@@ -1,5 +1,6 @@
 package com.jj.eventify.service;
 
+
 import com.jj.eventify.model.Event;
 import com.jj.eventify.model.JoinRequest;
 import com.jj.eventify.model.User;
@@ -7,8 +8,8 @@ import com.jj.eventify.repository.EventRepository;
 import com.jj.eventify.repository.JoinRequestRepository;
 import com.jj.eventify.repository.MessageRepository;
 import com.jj.eventify.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,8 +21,8 @@ public class EventService {
     private final JoinRequestRepository joinRequestRepository;
     private final MessageRepository messageRepository;
 
-    public EventService(EventRepository eventRepository, 
-                        UserRepository userRepository, 
+    public EventService(EventRepository eventRepository,
+                        UserRepository userRepository,
                         JoinRequestRepository joinRequestRepository,
                         MessageRepository messageRepository) {
         this.eventRepository = eventRepository;
